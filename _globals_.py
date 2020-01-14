@@ -1,6 +1,4 @@
-#!/mnt/e/e/winProgs/Python/python.exe
-from time import time, localtime
-from win32gui import GetWindowText, GetForegroundWindow
+from time import time, localtime;
 
 sql_conn = sql_ctrl = None;
 sql_record = {"record":""};

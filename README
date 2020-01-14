@@ -1,0 +1,13 @@
+INSTALLATION
+>sysWatch makes use of the following stdlib modules
+	time
+	sqlite3
+>sysWatch requires the following modules to be installed
+>>All Platforms
+	pip3 install pynput
+>>Windows
+	pip3 install pywin32
+>>Linux
+	apt install xdotool
+	pip3 install python-libxdo
+
