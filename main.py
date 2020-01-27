@@ -1,13 +1,70 @@
 #!/usr/bin/python3
-import sys
+from sys import argv, platform, path as syspath
+from os import path as ospath
+BASE_DIR = ospath.dirname(ospath.abspath(__file__))
+LIBS_DIR = BASE_DIR+"/libs/"
+syspath.append(LIBS_DIR)
+
+def helpMessage():
+    print( "-h -H --help :: show this help message" )
+    print( "-t -T --train :: retrain the facial recognition model from libs/user_images/*" )
+    print( "-c -C --camera :: run the application with the camera feed shown" )
+    print( "-s -S --server :: run the application with the dashboard webserver running on localhost:3000" )
+    exit()
+
+def mainWithCameraShown():
+    initSql();
+    initListeners();
+    initCV();
+    while 1:
+        checkActiveWindow();
+        getUsersInFrameAndShow();
+    closeSql();
+    closeCV();
+
+def basicMain():
+    initSql();
+    initListeners();
+    initCV();
+    while 1:
+        checkActiveWindow();
+        getUsersInFrame();
+    closeSql();
+    closeCV();
+
 if __name__ == "__main__":
-    platform = sys.platform;
-    sys.path.append('./libs/');
+    #verify OS is supported
+    from sys import platform
     if (platform == "win32"):
-        from _windows_ import winMain;
-        winMain();
+        from _windows_ import *;
     elif (platform == "linux"):
-        from _linux_ import linuxMain;
-        linuxMain();
+        from _linux_ import *;
     else:
-        print("unsupported os");
+        print("unsupported operating system");
+        exit();
+    #######################
+    #show help message if prompted
+    if "--help" in argv or "-H" in argv or "-h" in argv:
+        helpMessage();
+    ##############################
+    #import local functions
+    from _sql_functions_ import *
+    from _listener_functions_ import *
+    from _globals_ import *
+    from _cv_ import *
+    from _signals_ import *
+    ######################
+    #retrain FR model if prompted
+    if "--train" in argv or "-T" in argv or "-t" in argv:
+        trainModel();
+    #############################
+    #run the webserver on port 3000 if prompted
+    if "--server" in argv or "-S" in argv or "-s" in argv:
+        print("webserver")
+    ###########################################
+    #begin runtime : (with camera if prompted)
+    if "--camera" in argv or "-C" in argv or "-c" in argv:
+        mainWithCameraShown()
+    else:
+        basicMain();
+    ##########################################

@@ -14,28 +14,50 @@ def closeSqlController():
 def closeSqlConnection():
     global sql_conn
     sql_conn.close();
+def closeSql():
+    postSqlRecord()
+    closeSqlConnection();
+
 def initSql():
     global sql_ctrl;
     initSqlConnection();
     initSqlController();
-    sql_ctrl.execute("CREATE TABLE IF NOT EXISTS usage(year REAL, month REAL, day REAL, date TEXT,start_hour REAL, start_minutes REAL, start_seconds REAL, start_time TEXT, window_pid REAL, window_title TEXT, mouse_record TEXT, key_record TEXT, combined_record TEXT, end_hour REAL, end_minutes REAL, end_seconds REAL, end_time TEXT, active_user TEXT)");
-    sql_record = {"year":0, "month":0, "day":0, "date":"", "start_hour":0, "start_minutes":0, "start_seconds":0, "start_time":"", "window_pid":0, "window_title":"","mouse_record":"", "key_record":"","combined_record":"", "end_hour":0, "end_minutes":0, "end_seconds":0, "end_time":"", "active_user":"unknown"};
+    sql_ctrl.execute("CREATE TABLE IF NOT EXISTS usage(year REAL, month REAL, day REAL, date TEXT,start_hour REAL, start_minutes REAL, start_seconds REAL, start_time TEXT, window_pid REAL, window_title TEXT, mouse_record TEXT, key_record TEXT, combined_record TEXT, end_hour REAL, end_minutes REAL, end_seconds REAL, end_time TEXT, active_users TEXT)");
+    sql_record = {"year":0, "month":0, "day":0, "date":"", "start_hour":0, "start_minutes":0, "start_seconds":0, "start_time":"", "window_pid":0, "window_title":"","mouse_record":"", "key_record":"","combined_record":"", "end_hour":0, "end_minutes":0, "end_seconds":0, "end_time":"", "active_users":"UNKNOWN"};
     sql_ctrl.close();
 def postSqlRecord():
     global sql_comm, sql_ctrl;
     initSqlController();
-    sql_insert_string = "INSERT INTO usage VALUES({},{},{},'{}',{},{},{},'{}',{},'{}','{}','{}','{}',{},{},{},'{}')".format(\
+    sql_insert_string = "INSERT INTO usage VALUES({},{},{},'{}',{},{},{},'{}',{},'{}','{}','{}','{}',{},{},{},'{}','{}')".format(\
                 sql_record["year"], sql_record["month"], sql_record["day"], sql_record["date"],\
                 sql_record["start_hour"],sql_record["start_minutes"], sql_record["start_seconds"], sql_record["start_time"],
                 sql_record["window_pid"],sql_record["window_title"],sql_record["mouse_record"], sql_record["key_record"],\
                 sql_record["combined_record"], sql_record["end_hour"], sql_record["end_minutes"], sql_record["end_seconds"],\
-                sql_record["end_time"]);
+                sql_record["end_time"], sql_record["active_users"]);
     sql_ctrl.execute(sql_insert_string);	
     sql_conn.commit();
     closeSqlController();
 def resetSqlRecord():
     global sql_record;
-    sql_record = {"year":0, "month":0, "day":0, "date":"", "start_hour":0, "start_minutes":0, "start_seconds":0, "start_time":"", "window_pid":0, "window_title":"","mouse_record":"", "key_record":"","combined_record":"", "end_hour":0, "end_minutes":0, "end_seconds":0, "end_time":"", "active_user":"unknown"};
+    sql_record = {"year":0, "month":0, "day":0, "date":"", "start_hour":0, "start_minutes":0, "start_seconds":0, "start_time":"", "window_pid":0, "window_title":"","mouse_record":"", "key_record":"","combined_record":"", "end_hour":0, "end_minutes":0, "end_seconds":0, "end_time":"", "active_users":"UNKNOWN"};
+    sql_record["year"] = 0;
+    sql_record["month"] = 0;
+    sql_record["day"] = 0;
+    sql_record["date"] = "";
+    sql_record["start_hour"] = 0;
+    sql_record["start_minutes"] = 0;
+    sql_record["start_seconds"] = 0;
+    sql_record["start_time"] = "";
+    sql_record["window_pid"] = 0;
+    sql_record["window_title"] = "";
+    sql_record["mouse_record"] = "";
+    sql_record["key_record"] = "";
+    sql_record["combined_record"] = "";
+    sql_record["end_hour"] = 0;
+    sql_record["end_minutes"] = 0;
+    sql_record["end_seconds"] = 0;
+    sql_record["end_time"] = "";
+
 def sqlSetWindowTitle(title):
     sql_record["window_title"] = title;
 def sqlSetWindowPid(pid):
@@ -73,3 +95,5 @@ def sqlMouseRecordAppend( string ):
 def sqlCombinedRecordAppend( string ):
     global sql_record;
     sql_record["combined_record"] += string;
+def sqlAppendActiveUser( user ):
+        sql_record["active_users"] = user

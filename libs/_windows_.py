@@ -1,7 +1,4 @@
 #!/usr/bin/python3
-from _sql_functions_ import *
-from _listener_functions_ import *
-from _globals_ import *
 from win32gui import GetWindowText, GetForegroundWindow;
 
 def postRecord():

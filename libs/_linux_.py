@@ -2,7 +2,7 @@
 from _sql_functions_ import *
 from _listener_functions_ import *
 from _globals_ import *
-import os
+from os import popen
 
 def postRecord():
     global record
@@ -15,11 +15,11 @@ def resetRecord():
     record = setStartTime();
 def checkActiveWindow():
     global active_window_title, active_pid;
-    pid = os.popen('xdotool getactivewindow getwindowpid').read();
+    pid = popen('xdotool getactivewindow getwindowpid').read();
     if (active_pid != pid):
         active_pid = pid;
         sqlSetWindowPid(active_pid);
-        title = os.popen('xdotool getactivewindow getwindowname').read();
+        title = popen('xdotool getactivewindow getwindowname').read();
         if active_window_title != title:
             active_window_title = title;
             sqlSetWindowTitle(active_window_title);
