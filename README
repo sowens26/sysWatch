@@ -12,6 +12,13 @@ using a different camera may cause recognition errors
 if the face is not one of the authorized users the record will show UNKNOWN
 if the face is one of the authorized user that user's name will be added to the sql record
 
+the sqlite database resides in the file usage.db
+it contains a single table titled:	
+	usage
+this table contains the following columns:
+	year	month	day	date	start_hour	start_minutes	start_seconds	start_time
+	window_pid	window_title	mouse_record	key_record	combined_record	
+	end_hour	end_minutes	end_seconds	end_time	active_users
 
 INSTALLATION
 SysWatch makes use of the following python3 stdlib modules
