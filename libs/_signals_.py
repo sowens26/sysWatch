@@ -1,10 +1,15 @@
 from signal import signal, SIGINT, SIGTERM
 from _sql_functions_ import *
 from _cv_ import *
-def signalHandler(signal, frame) -> None:
+def interrupt(signal, frame) -> None:
     closeSqlConnection();
     closeCV();
     exit();
-signal(SIGINT, signalHandler)
-signal(SIGTERM, signalHandler)
+def terminate(signal, frame) -> None:
+    print("aa");
+    closeSqlConnection();
+    closeCV();
+    exit();
+signal(SIGINT, interrupt)
+signal(SIGTERM, terminate)
 

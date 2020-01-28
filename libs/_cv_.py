@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 import cv2
 import os
+from shutil import rmtree
 import numpy as np
 from PIL import Image
 from pickle import dump, load
 from _sql_functions_ import sqlAppendActiveUser
+from _globals_ import helpMessage
 
 #dirs
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -20,7 +22,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX;
 color = (0, 255, 0);
 stroke = 1;
 cap = cv2.VideoCapture(0);
-reco = cv2.face.createLBPHFaceRecognizer()
+reco = cv2.face.LBPHFaceRecognizer_create()
 face_cascades = [\
     cv2.CascadeClassifier(cascade_dir+'frontal.xml'),\
     cv2.CascadeClassifier(cascade_dir+'frontal2.xml'),\
@@ -57,20 +59,26 @@ def trainModel() -> None:
                         y_labels.append(_id)   
     with open(labels_path, 'wb') as f:
         dump(label_ids, f)
-    reco.train(x_train, np.array(y_labels))
+    try:
+        reco.train(x_train, np.array(y_labels))
+    except:
+        helpMessage();
+        print("no user images found");
+        addUserImage();
     reco.save(model_path)
 
 def addUserImage() -> None:
+
     name = input("enter the name of the user: ")
+    print("press ENTER to save an image, press ESC when you're finished")
     user_dir = os.path.join(image_dir, "{}/".format(name))
     if not os.path.exists(user_dir):
-        os.makedirs(user_dir)
+            os.makedirs(user_dir)
     count = len(os.listdir(user_dir))+1
     while True:
         ret, frame = cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         cv2.putText(frame, "press ENTER to save image\n press ESC to abort", (50, 50), font, stroke, color);
-        cv2.imshow("frame", frame)
         faces = getFaces(gray);
         if len(faces) > 0:
             img = gray
@@ -81,12 +89,24 @@ def addUserImage() -> None:
             count+=1;
             cv2.destroyWindow("image");
         elif (k &  0xff == 27 ):#escape
-            break;
+            if count == 0:
+                rmtree(image_dir)
+                print("no user added");
+                exit();
+            else:
+                break;
     trainModel();
+    cv2.destroyWindow("image")
+    exit();
+    
 
 def loadModel() -> None:
     global labels;
-    reco.load(model_path);
+    try:
+        reco.read(model_path);
+    except:
+        trainModel()
+        reco.read(model_path)
     with open(labels_path, 'rb') as f:
         labels = {v:k for k, v in load(f).items()}
 
@@ -114,7 +134,7 @@ def getUsersInFrameAndShow() -> None:
         for (x,y,w,h) in f:
             roi_g = gray[x:x+w, y:y+h]
             id_, conf = reco.predict(roi_g)
-            if conf > 60:
+            if conf > 60 and labels[id_] not in users:
                 sqlAppendActiveUser(labels[id_])
                 cv2.putText(frame, "{} {}".format(labels[id_],round(conf,3)), (x,y), font, 1, color, stroke, cv2.LINE_AA)
                 cv2.rectangle(frame, (x,y), (x+w, y+h), (255,0,0), 2);

@@ -5,17 +5,10 @@ BASE_DIR = ospath.dirname(ospath.abspath(__file__))
 LIBS_DIR = BASE_DIR+"/libs/"
 syspath.append(LIBS_DIR)
 
-def helpMessage():
-    print( "-h -H --help :: show this help message" )
-    print( "-t -T --train :: retrain the facial recognition model from libs/user_images/*" )
-    print( "-c -C --camera :: run the application with the camera feed shown" )
-    print( "-s -S --server :: run the application with the dashboard webserver running on localhost:3000" )
-    exit()
-
 def mainWithCameraShown():
+    initCV();
     initSql();
     initListeners();
-    initCV();
     while 1:
         checkActiveWindow();
         getUsersInFrameAndShow();
@@ -23,15 +16,14 @@ def mainWithCameraShown():
     closeCV();
 
 def basicMain():
+    initCV();
     initSql();
     initListeners();
-    initCV();
     while 1:
         checkActiveWindow();
         getUsersInFrame();
     closeSql();
     closeCV();
-
 if __name__ == "__main__":
     #verify OS is supported
     from sys import platform
@@ -46,6 +38,7 @@ if __name__ == "__main__":
     #show help message if prompted
     if "--help" in argv or "-H" in argv or "-h" in argv:
         helpMessage();
+        exit();
     ##############################
     #import local functions
     from _sql_functions_ import *
