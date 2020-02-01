@@ -4,11 +4,14 @@ from os import path as ospath
 BASE_DIR = ospath.dirname(ospath.abspath(__file__))
 LIBS_DIR = BASE_DIR+"/libs/"
 syspath.append(LIBS_DIR)
+from _signals_ import initSignals
 
 def mainWithCameraShown():
+    initSignals();
     initCV();
     initSql();
     initListeners();
+    print("starting app with camera feed shown\n\tpress ESC to close ")
     while 1:
         checkActiveWindow();
         getUsersInFrameAndShow();
@@ -16,9 +19,12 @@ def mainWithCameraShown():
     closeCV();
 
 def basicMain():
+    print(argv)
+    initSignals();
     initCV();
     initSql();
     initListeners();
+    print("starting app with camera feed not shown")
     while 1:
         checkActiveWindow();
         getUsersInFrame();
@@ -47,6 +53,9 @@ if __name__ == "__main__":
     from _cv_ import *
     from _signals_ import *
     ######################
+    #add user images if prompted
+    if "--add-user" in argv or "-au" in argv or "-AU" in argv:
+        addUserImage();
     #retrain FR model if prompted
     if "--train" in argv or "-T" in argv or "-t" in argv:
         trainModel();

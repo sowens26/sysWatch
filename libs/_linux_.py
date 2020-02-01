@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-from _sql_functions_ import *
-from _listener_functions_ import *
+from _sql_functions_ import resetSqlRecord, setStartTime, setEndTime, postSqlRecord, closeSqlConnection,\
+        initSql, sqlSetWindowTitle, sqlSetWindowPid
+from _listener_functions_ import initListeners
 from _globals_ import *
 from os import popen
 

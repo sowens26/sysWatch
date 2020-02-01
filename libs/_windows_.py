@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 from win32gui import GetWindowText, GetForegroundWindow;
+from _sql_functions_ import resetSqlRecord, setStartTime, setEndTime, postSqlRecord, closeSqlConnection,\
+        initSql, sqlSetWindowTitle, sqlSetWindowPid
+from _listener_functions_ import initListeners
+
 
 def postRecord():
     global record

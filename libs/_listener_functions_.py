@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 from _globals_ import *
-from _sql_functions_ import *
+from _sql_functions_ import sqlMouseRecordAppend, sqlCombinedRecordAppend, sqlKeyRecordAppend
 from pynput import keyboard as kb, mouse as ms
 
 def initListeners():

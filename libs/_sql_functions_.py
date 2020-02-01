@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 from _globals_ import *
-import sqlite3 as sql
+from sqlite3 import connect
 from time import time, localtime;
 def initSqlConnection():
     global sql_conn
-    sql_conn = sql.connect("usage.db");
+    sql_conn = connect("usage.db");
 def initSqlController():
     global sql_ctrl;
     sql_ctrl = sql_conn.cursor();
