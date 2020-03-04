@@ -29,9 +29,3 @@ def checkActiveWindow():
                 resetRecord();
 
 
-def linuxMain():
-    initSql();
-    initListeners();
-    while 1:
-        checkActiveWindow();
-    closeSqlConnection();

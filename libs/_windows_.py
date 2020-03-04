@@ -3,6 +3,7 @@ from win32gui import GetWindowText, GetForegroundWindow;
 from _sql_functions_ import resetSqlRecord, setStartTime, setEndTime, postSqlRecord, closeSqlConnection,\
         initSql, sqlSetWindowTitle, sqlSetWindowPid
 from _listener_functions_ import initListeners
+from _globals_ import *
 
 
 def postRecord():
@@ -25,12 +26,5 @@ def checkActiveWindow():
             active_window_title  = GetWindowText(GetForegroundWindow());
             sqlSetWindowTitle(active_window_title);
             if (active_window_title not in ignore_titles):
-                print(GetCurrentProcessId());
                 postRecord();
                 resetRecord();
-def winMain():
-    initSql();
-    initListeners();
-    while 1:
-        checkActiveWindow();
-    closeSqlConnection();

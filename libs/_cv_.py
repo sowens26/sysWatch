@@ -1,20 +1,21 @@
-#!/usr/bin/python3
+#!E:/winProgs/Python/python.exe
 from cv2 import destroyWindow, destroyAllWindows, VideoCapture, FONT_HERSHEY_SIMPLEX, COLOR_BGR2GRAY,\
-        CascadeClassifier, waitKey, imshow, imwrite, rectangle, putText, cvtColor, LINE_AA
+        CascadeClassifier, waitKey, imshow, imwrite, rectangle, putText, cvtColor, LINE_AA, CAP_DSHOW
 from cv2.face import LBPHFaceRecognizer_create
 from os import path,makedirs,listdir, walk
 from shutil import rmtree
 import numpy as np
 from PIL import Image
 from pickle import dump, load
-from _sql_functions_ import sqlAppendActiveUser, closeSqlConnection
+from numpy import concatenate
+from _sql_functions_ import sqlAppendActiveUser, closeSqlConnection, sqlAddUserAccount, sqlVerifyUserLogin
 from _globals_ import *
+from getpass import getpass
 
 #dirs
 BASE_DIR = path.dirname(path.abspath(__file__))
 image_dir = path.join(BASE_DIR,"user_images/")
 cascade_dir = path.join(BASE_DIR,"cascades/")
-if not path.exists(image_dir): makedirs(image_dir);
 labels_path = path.join(image_dir, "labels.pcl")
 model_path = path.join(image_dir, "model.yml")
 #CV vars
@@ -23,7 +24,7 @@ labels = {}
 font = FONT_HERSHEY_SIMPLEX;
 color = (0, 255, 0);
 stroke = 1;
-cap = VideoCapture(0);
+cap = VideoCapture(0, CAP_DSHOW);
 reco = LBPHFaceRecognizer_create()
 face_cascades = [\
     CascadeClassifier(cascade_dir+'frontal.xml'),\
@@ -36,7 +37,7 @@ def getFaces(image_array) -> [tuple]:
         face_cascades[1].detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5),\
         face_cascades[2].detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5),\
         face_cascades[3].detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5) ]
-    return faces 
+    return faces
 
 def trainModel() -> None:
     id_c = 0 # counter
@@ -45,13 +46,13 @@ def trainModel() -> None:
     for root, dirs, files in walk(image_dir):
         for f in files:
             if f.endswith('png') or f.endswith('jpg'):
-                path = path.join(root,f)
+                file_path = path.join(root,f)
                 label = path.basename(root).replace(' ','_').lower()
                 if label not in label_ids:
                     label_ids[label] = id_c
                     id_c += 1
                 _id = label_ids[label]
-                img = Image.open(path).convert('L')
+                img = Image.open(file_path).convert('L')
                 image_array = np.array(img, 'uint8')
                 faces = getFaces(image_array);
                 for f in faces:
@@ -71,36 +72,58 @@ def trainModel() -> None:
     print("recognition model trained");
 
 def addUserImage() -> None:
-    name = input("enter the name of the user: ")
-    print("press ENTER to save an image, press ESC when you're finished")
+    name = input("enter the name of the user: ").strip()
+    password = getpass("enter the password for the account: ").strip()
     user_dir = path.join(image_dir, "{}/".format(name))
+    while( sqlVerifyUserLogin(name, password) == 0 ):
+        print("incorrect password, try again");
+        password = getpass("enter the password for the account: ").strip()
+    if sqlVerifyUserLogin(name, password) == -1:
+        print("account does not exist, creating it now")
+        p2 = getpass("verify your password: ").strip()
+        while(password != p2):
+            print("passwords did not match")
+            password = getpass("enter the password for the account: ").strip()
+            p2 = getpass("verify your password: ").strip()
+        sqlAddUserAccount(name, password)
+    else:
+        print("account found")
     if not path.exists(user_dir):
-            makedirs(user_dir)
+        makedirs(user_dir)
+    print(">\na window showing the camera feed should appear immediately")
+    print("a gray-scale image window will appear when a face has been found in the video camera's view")
+    print("select one of the windows and press ENTER to save an image, press ESC when you're finished")
+    print("the app will continue updating the gray-scale image to be saved until you press ESC\n>")
     count = len(listdir(user_dir))+1
     while True:
         ret, frame = cap.read()
+        imshow('camera feed', frame)
         gray = cvtColor(frame, COLOR_BGR2GRAY)
         putText(frame, "press ENTER to save image\n press ESC to abort", (50, 50), font, stroke, color);
         faces = getFaces(gray);
-        if len(faces) > 0:
+        if not all([f == () for f in faces]):
             img = gray
-            imshow("image", img)
+            imshow("image to save", img)
         k = waitKey(1);
         if (k & 0xff in [ord('\r'), ord('\n')]):#enter
-            imwrite("{}/{}.png".format(user_dir, count), img)
-            print("images saved to {}/{}.png".format(user_dir, count))
+            if np.any(img):
+                destroyWindow('image to save')
+                imwrite("{}/{}.png".format(user_dir, count), img)
+                print("image saved to {}/{}.png".format(user_dir, count))
+                if not path.exists(user_dir+"/thumb.png"):
+                    imwrite("{}/thumb.png".format(user_dir), img)
+                    print("thumbnail created at {}/thumb.png".format(user_dir))
             count+=1;
-            destroyWindow("image");
+            img = np.zeros_like(img)
         elif (k &  0xff == 27 ):#escape
             if count == 0:
                 rmtree(image_dir)
                 print("no user added");
-                exit();
+                break;
             else:
                 break;
-    destroyWindow("image")
+    destroyAllWindows()
     trainModel();
-    exit();
     
 def loadModel() -> None:
     global labels;
@@ -144,9 +167,11 @@ def getUsersInFrameAndShow() -> None:
         exit();
 
 def initCV() -> None:
+    if not path.exists(image_dir): makedirs(image_dir);
     loadModel();
 
 def closeCV() -> None:
+    global cap
     cap.release();
     destroyAllWindows();
 

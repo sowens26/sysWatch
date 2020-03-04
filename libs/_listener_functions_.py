@@ -31,7 +31,7 @@ def onMouseScroll(x, y, dx, dy):
     if (dx!=0): 
         sqlMouseRecordAppend( "<scrolled {} at {}> ".format( "left" if dx<0 else "right", (x,y)) );
         sqlCombinedRecordAppend( "<scrolled {} at {}> ".format( "left" if dx<0 else "right", (x,y)) );
-    if (dy!=0): 
+    elif (dy!=0): 
         sqlMouseRecordAppend( "<scrolled {} at {}> ".format( 'down' if dy<0 else 'up', (x,y)) );
         sqlCombinedRecordAppend( "<scrolled {} at {}> ".format( 'down' if dy<0 else 'up', (x,y)) );
 def onMouseClick(x, y, button, pressed):
