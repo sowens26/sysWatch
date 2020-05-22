@@ -1,4 +1,3 @@
-#!/mnt/e/winProgs/Python/python.exe -B
 from sys import argv, platform, path as syspath
 from os import path as ospath
 BASE_DIR = ospath.dirname(ospath.abspath(__file__))
@@ -18,7 +17,6 @@ def initAll():
     initSql();
     initCV();
     initListeners();
-
 def closeAll():
     closeSql();
     closeCV();

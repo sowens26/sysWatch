@@ -1,4 +1,3 @@
-#!E:/winProgs/Python/python.exe
 from cv2 import destroyWindow, destroyAllWindows, VideoCapture, FONT_HERSHEY_SIMPLEX, COLOR_BGR2GRAY,\
         CascadeClassifier, waitKey, imshow, imwrite, rectangle, putText, cvtColor, LINE_AA, CAP_DSHOW
 from cv2.face import LBPHFaceRecognizer_create
@@ -25,6 +24,7 @@ font = FONT_HERSHEY_SIMPLEX;
 color = (0, 255, 0);
 stroke = 1;
 cap = VideoCapture(0, CAP_DSHOW);
+cap = VideoCapture(0)
 reco = LBPHFaceRecognizer_create()
 face_cascades = [\
     CascadeClassifier(cascade_dir+'frontal.xml'),\
@@ -33,10 +33,10 @@ face_cascades = [\
     CascadeClassifier(cascade_dir+'frontal4.xml') ]
 
 def getFaces(image_array) -> [tuple]:
-    faces = [ face_cascades[0].detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5),\
-        face_cascades[1].detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5),\
-        face_cascades[2].detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5),\
-        face_cascades[3].detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5) ]
+    faces = [ face_cascades[0].detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5), ]
+      #  face_cascades[1].detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5),\
+     #   face_cascades[2].detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5),\
+       # face_cascades[3].detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5) ]
     return faces
 
 def trainModel() -> None:
@@ -75,10 +75,14 @@ def addUserImage() -> None:
     name = input("enter the name of the user: ").strip()
     password = getpass("enter the password for the account: ").strip()
     user_dir = path.join(image_dir, "{}/".format(name))
-    while( sqlVerifyUserLogin(name, password) == 0 ):
-        print("incorrect password, try again");
-        password = getpass("enter the password for the account: ").strip()
-    if sqlVerifyUserLogin(name, password) == -1:
+    verify = sqlVerifyUserLogin(name, password);
+    if verify == 0:
+        print("incorrect password")
+        return
+    elif verify == 1:
+        print("account verified")
+        print("new images will be added to the existing record")
+    elif verify == -1:
         print("account does not exist, creating it now")
         p2 = getpass("verify your password: ").strip()
         while(password != p2):
@@ -86,8 +90,6 @@ def addUserImage() -> None:
             password = getpass("enter the password for the account: ").strip()
             p2 = getpass("verify your password: ").strip()
         sqlAddUserAccount(name, password)
-    else:
-        print("account found")
     if not path.exists(user_dir):
         makedirs(user_dir)
     print(">\na window showing the camera feed should appear immediately")
@@ -97,6 +99,8 @@ def addUserImage() -> None:
     count = len(listdir(user_dir))+1
     while True:
         ret, frame = cap.read()
+        if frame == None:
+            continue
         imshow('camera feed', frame)
         gray = cvtColor(frame, COLOR_BGR2GRAY)
         putText(frame, "press ENTER to save image\n press ESC to abort", (50, 50), font, stroke, color);
@@ -139,6 +143,8 @@ def loadModel() -> None:
 def getUsersInFrame() -> [str]:
     global users;
     ret, frame = cap.read();
+    if frame == None:
+        return None;
     gray = cvtColor(frame, COLOR_BGR2GRAY);
     faces = getFaces(gray);
     for f in faces:
@@ -150,6 +156,7 @@ def getUsersInFrame() -> [str]:
 
 def getUsersInFrameAndShow() -> None:
     ret, frame = cap.read();
+    if frame is None: return None;
     gray = cvtColor(frame, COLOR_BGR2GRAY);
     faces = getFaces(gray);
     for f in faces:
@@ -174,4 +181,3 @@ def closeCV() -> None:
     global cap
     cap.release();
     destroyAllWindows();
-
