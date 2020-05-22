@@ -1,3 +1,5 @@
+PLEASE SEND ALL BUG REPORTS TO: samuel@slowens.com
+
 SysWatch aims to provide a tool for monitoring the activity on a particular machine
 it creates an sqlite database of all activity on the machine
 each record represents a change in the current "focused" window
@@ -42,5 +44,4 @@ the python-libxdo module is incomplete and does not have documentation,
 it may be incorporated if/when it is a functional and complete module
 
 	apt install xdotool
-	**pip3 install python-libxdo**
 
